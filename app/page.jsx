@@ -99,10 +99,10 @@ export default function Home() {
             <Reveal>
               <MacWindow url="about me" className="float-slow mx-auto w-full max-w-sm">
                 <Image
-                  src="/profile-pic.webp"
+                  src="/Profile.webp"
                   alt="Portrait of Mohammed Ajmal A"
-                  width={410}
-                  height={612}
+                  width={1536}
+                  height={2752}
                   priority
                   className="h-auto w-full"
                 />
