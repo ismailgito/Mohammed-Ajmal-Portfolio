@@ -1,26 +1,128 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-cream: #f5ebd9;
+  --color-ink: #1a1a1a;
+  --color-concrete: #b9b6b0;
+  --font-display: var(--font-anton), Impact, sans-serif;
+  --font-script: var(--font-great-vibes), cursive;
+  --font-sans: var(--font-montserrat), Helvetica, Arial, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-concrete font-sans text-ink;
+    background-image:
+      radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+      radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+    background-size: 6px 6px, 11px 11px;
+    background-position: 0 0, 3px 3px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .slide {
+    @apply relative overflow-hidden bg-cream shadow-[0_24px_60px_rgba(0,0,0,0.35),0_4px_12px_rgba(0,0,0,0.2)];
+  }
+}
+
+/* ---------- Animations ---------- */
+
+/* Scroll reveal (see components/Reveal.jsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Hero entrance */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-in {
+  opacity: 0;
+  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+/* Floating brush shapes + portrait */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 3deg)); }
+}
+.float { animation: float 7s ease-in-out infinite; }
+.float-slow { animation: float 10s ease-in-out infinite reverse; }
+
+/* Gradient shimmer on the name */
+@keyframes shimmer {
+  to { background-position: 200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #1a1a1a 0%, #1a1a1a 40%, #ff5f56 50%, #1a1a1a 60%, #1a1a1a 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+/* Elements combining hero-in + shimmer-text need both animations named
+   explicitly, otherwise the later class's `animation` shorthand wins the
+   cascade and silently overrides the other (leaving opacity stuck at 0). */
+.hero-in.shimmer-text {
+  animation: rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) forwards, shimmer 5s linear infinite;
+}
+
+/* Logo marquee */
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+.marquee {
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee-track { animation: marquee 40s linear infinite; }
+.marquee-reverse { animation-direction: reverse; }
+.marquee:hover .marquee-track { animation-play-state: paused; }
+
+/* Logos: grey until hovered, then brand colour + pop */
+.logo-icon { color: #555; transition: color 0.3s, transform 0.3s; display: inline-grid; place-items: center; }
+.logo-chip, .logo-tile, .cert-badge {
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s;
+}
+.logo-chip:hover, .logo-tile:hover, .cert-badge:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 4px 4px 0 var(--brand);
+}
+.logo-chip:hover .logo-icon, .logo-tile:hover .logo-icon, .cert-badge:hover .logo-icon {
+  color: var(--brand);
+  transform: rotate(-8deg) scale(1.15);
+}
+
+/* Pills + campaign cards */
+.pill { transition: transform 0.25s, background-color 0.25s, color 0.25s; }
+.pill:hover { transform: translateY(-3px) rotate(-1.5deg); background: #1a1a1a; color: #f5ebd9; }
+.card-lift { transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s; }
+.card-lift:hover { transform: translateY(-8px) rotate(-0.6deg); box-shadow: 0 22px 40px rgba(0, 0, 0, 0.32); }
+
+/* Timeline dot pulse */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(255, 189, 46, 0.7); }
+  100% { box-shadow: 0 0 0 14px rgba(255, 189, 46, 0); }
+}
+.pulse-dot { animation: pulse-ring 2s ease-out infinite; }
+
+/* Underline sweep for links */
+.link-sweep { background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat; transition: background-size 0.3s; }
+.link-sweep:hover { background-size: 100% 2px; }
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .hero-in, .hero-in.shimmer-text { opacity: 1; transform: none; animation: none; transition: none; }
+  .float, .float-slow, .shimmer-text, .marquee-track, .pulse-dot { animation: none; }
+  html { scroll-behavior: auto; }
 }
